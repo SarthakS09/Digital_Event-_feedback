@@ -1,6 +1,6 @@
 /* DIGITAL EVENT FEEDBACK ANALYZER - Frontend with Backend API */
 
-const API_BASE = window.API_BASE || 'http://localhost:3000';
+const API_BASE = window.API_BASE || 'https://digital-event-feedback.onrender.com/';
 let useApi = true;
 let feedbackStore = [];
 let sentimentChart = null;
