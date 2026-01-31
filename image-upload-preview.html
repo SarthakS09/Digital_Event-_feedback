@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Upload Feature - Preview Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0d0e12;
+      --bg-card: #16181e;
+      --bg-elevated: #1c1f26;
+      --text: #e8e9ec;
+      --text-muted: #8b8f9a;
+      --accent: #f59e0b;
+      --accent-dim: #d97706;
+      --accent-glow: rgba(245, 158, 11, 0.22);
+      --positive: #34d399;
+      --neutral: #fbbf24;
+      --negative: #f87171;
+      --border: rgba(255, 255, 255, 0.06);
+      --font: 'Outfit', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --radius: 12px;
+      --radius-lg: 20px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 2rem;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding: 2rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent-dim));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header p {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+    }
+
+    .demo-section {
+      margin-bottom: 3rem;
+    }
+
+    .demo-title {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .demo-title span {
+      font-size: 1.8rem;
+    }
+
+    .demo-description {
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      padding-left: 2.3rem;
+    }
+
+    /* Toolbar Demo */
+    .insights-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding: 1.5rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+    }
+
+    .insights-toolbar select {
+      padding: 0.6rem 1rem;
+      font-family: var(--font);
+      font-size: 0.95rem;
+      color: var(--text);
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      min-width: 200px;
+      cursor: pointer;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.6rem 1.2rem;
+      font-family: var(--font);
+      font-weight: 600;
+      font-size: 0.9rem;
+      border-radius: var(--radius);
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+      gap: 0.5rem;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--bg);
+      box-shadow: 0 4px 20px var(--accent-glow);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .export-buttons {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-left: auto;
+    }
+
+    /* Modal Demo */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 1rem;
+    }
+
+    .modal.hidden {
+      display: none;
+    }
+
+    .modal-content {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      animation: modalSlideIn 0.3s ease-out;
+    }
+
+    @keyframes modalSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.5rem 2rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-header h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text);
+      margin: 0;
+    }
+
+    .close-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 2rem;
+      line-height: 1;
+      cursor: pointer;
+      padding: 0;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .close-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--accent);
+    }
+
+    .modal-body {
+      padding: 2rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .form-group input[type="file"] {
+      width: 100%;
+      padding: 0.9rem 1rem;
+      font-family: var(--font);
+      font-size: 1rem;
+      color: var(--text);
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      cursor: pointer;
+    }
+
+    .form-hint {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+    }
+
+    .image-preview-container {
+      margin: 1.5rem 0;
+      text-align: center;
+      min-height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-elevated);
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+    }
+
+    .image-preview-container img {
+      max-width: 100%;
+      max-height: 300px;
+      border-radius: var(--radius);
+      object-fit: contain;
+    }
+
+    .preview-placeholder {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    /* Event Image Display */
+    .event-image-container {
+      margin-bottom: 1.5rem;
+      padding: 1.5rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+    }
+
+    .event-image-wrapper {
+      position: relative;
+      max-width: 800px;
+      margin: 0 auto;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--bg-elevated);
+    }
+
+    .event-image {
+      width: 100%;
+      height: auto;
+      max-height: 400px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .delete-image-btn {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: rgba(248, 113, 113, 0.9);
+      border: none;
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      font-size: 1.5rem;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, transform 0.2s;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .delete-image-btn:hover {
+      background: rgba(220, 38, 38, 0.95);
+      transform: scale(1.1);
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .feature-card {
+      padding: 1.5rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .feature-card:hover {
+      border-color: rgba(245, 158, 11, 0.25);
+      transform: translateY(-4px);
+    }
+
+    .feature-card h3 {
+      color: var(--accent);
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .feature-card p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .code-block {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+      margin: 1rem 0;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: var(--positive);
+      overflow-x: auto;
+    }
+
+    .note {
+      background: rgba(245, 158, 11, 0.1);
+      border-left: 3px solid var(--accent);
+      padding: 1rem;
+      border-radius: var(--radius);
+      margin: 1rem 0;
+    }
+
+    .note-title {
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 1rem;
+      }
+
+      .header h1 {
+        font-size: 1.8rem;
+      }
+
+      .insights-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .export-buttons {
+        margin-left: 0;
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>📷 Image Upload Feature</h1>
+      <p>Interactive Preview & Demo</p>
+    </div>
+
+    <!-- Section 1: Toolbar with Upload Button -->
+    <div class="demo-section">
+      <h2 class="demo-title">
+        <span>1️⃣</span>
+        Upload Button in Insights Toolbar
+      </h2>
+      <p class="demo-description">
+        The new "📷 Upload Image" button appears in the insights toolbar, next to the export buttons.
+      </p>
+      <div class="insights-toolbar">
+        <select>
+          <option>TECHNAVYA 2.0</option>
+          <option>Dev Summit 2025</option>
+          <option>Product Launch Q2</option>
+        </select>
+        <button class="btn btn-ghost" onclick="showModal()">
+          <span>📷</span> Upload Image
+        </button>
+        <div class="export-buttons">
+          <button class="btn btn-ghost">Export Excel</button>
+          <button class="btn btn-ghost">Export PDF</button>
+          <button class="btn btn-ghost">Export CSV</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2: Upload Modal -->
+    <div class="demo-section">
+      <h2 class="demo-title">
+        <span>2️⃣</span>
+        Upload Modal with Preview
+      </h2>
+      <p class="demo-description">
+        When you click "Upload Image", a beautiful modal appears with file selection and live preview.
+      </p>
+      <div class="note">
+        <div class="note-title">💡 Try It!</div>
+        Click the "📷 Upload Image" button above to see the modal in action.
+      </div>
+    </div>
+
+    <!-- Section 3: Image Display -->
+    <div class="demo-section">
+      <h2 class="demo-title">
+        <span>3️⃣</span>
+        Event Image Display
+      </h2>
+      <p class="demo-description">
+        After upload, the image displays beautifully with a delete button overlay.
+      </p>
+      <div class="event-image-container">
+        <div class="event-image-wrapper">
+          <img src="data:image/svg+xml,%3Csvg width='800' height='400' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23f59e0b;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%23d97706;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='800' height='400' fill='url(%23grad)'/%3E%3Ctext x='50%25' y='40%25' font-family='Arial' font-size='48' fill='white' text-anchor='middle'%3E📷 Event Image%3C/text%3E%3Ctext x='50%25' y='55%25' font-family='Arial' font-size='24' fill='white' text-anchor='middle' opacity='0.8'%3ETECHNAVYA 2.0%3C/text%3E%3Ctext x='50%25' y='65%25' font-family='Arial' font-size='18' fill='white' text-anchor='middle' opacity='0.6'%3EAnnual Tech Conference%3C/text%3E%3C/svg%3E" 
+               alt="Event image" 
+               class="event-image">
+          <button class="delete-image-btn" onclick="alert('Delete functionality works! In the real app, this would remove the image.')" title="Delete image">×</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 4: Features -->
+    <div class="demo-section">
+      <h2 class="demo-title">
+        <span>✨</span>
+        Key Features
+      </h2>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <h3>📁 File Types</h3>
+          <p>Supports JPEG, PNG, GIF, and WebP formats</p>
+        </div>
+        <div class="feature-card">
+          <h3>📏 Size Limit</h3>
+          <p>Maximum 5MB per image with automatic validation</p>
+        </div>
+        <div class="feature-card">
+          <h3>👁️ Preview</h3>
+          <p>See your image before uploading to confirm</p>
+        </div>
+        <div class="feature-card">
+          <h3>💾 Storage</h3>
+          <p>Base64 encoding stored directly in SQLite</p>
+        </div>
+        <div class="feature-card">
+          <h3>📱 Responsive</h3>
+          <p>Works perfectly on mobile and desktop</p>
+        </div>
+        <div class="feature-card">
+          <h3>🗑️ Easy Delete</h3>
+          <p>Remove images with a single click</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 5: Usage -->
+    <div class="demo-section">
+      <h2 class="demo-title">
+        <span>📖</span>
+        How to Use
+      </h2>
+      <p class="demo-description">
+        Simple 5-step process to upload event images:
+      </p>
+      <div class="code-block">
+1. Navigate to Insights section<br>
+2. Select an event from the dropdown<br>
+3. Click "📷 Upload Image" button<br>
+4. Choose your image file (max 5MB)<br>
+5. Preview and click "Upload Image"
+      </div>
+      <div class="note">
+        <div class="note-title">🎯 Best Practices</div>
+        <ul style="margin-left: 1.5rem; color: var(--text-muted);">
+          <li>Use high-quality images (1200x800px recommended)</li>
+          <li>Compress images to under 500KB for faster loading</li>
+          <li>Use 16:9 aspect ratio for best display</li>
+          <li>Professional images enhance event credibility</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal (Hidden by default) -->
+  <div id="uploadModal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Upload Event Image</h3>
+        <button class="close-btn" onclick="hideModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="imageFile">Select Image</label>
+          <input type="file" id="imageFile" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" onchange="previewImage(event)">
+          <p class="form-hint">Supported formats: JPEG, PNG, GIF, WebP. Maximum size: 5MB</p>
+        </div>
+        <div class="image-preview-container" id="previewContainer">
+          <span class="preview-placeholder">Image preview will appear here</span>
+        </div>
+        <button class="btn btn-primary" style="width: 100%;" onclick="uploadDemo()">Upload Image</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function showModal() {
+      document.getElementById('uploadModal').classList.remove('hidden');
+    }
+
+    function hideModal() {
+      document.getElementById('uploadModal').classList.add('hidden');
+      document.getElementById('imageFile').value = '';
+      document.getElementById('previewContainer').innerHTML = '<span class="preview-placeholder">Image preview will appear here</span>';
+    }
+
+    function previewImage(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      // Validate file size
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        alert('Image is too large! Maximum size is 5MB. Please compress your image.');
+        event.target.value = '';
+        return;
+      }
+
+      // Validate file type
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+      if (!validTypes.includes(file.type)) {
+        alert('Invalid file type! Please select a JPEG, PNG, GIF, or WebP image.');
+        event.target.value = '';
+        return;
+      }
+
+      // Show preview
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const previewContainer = document.getElementById('previewContainer');
+        previewContainer.innerHTML = '<img src="' + e.target.result + '" alt="Preview">';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function uploadDemo() {
+      const fileInput = document.getElementById('imageFile');
+      if (!fileInput.files.length) {
+        alert('Please select an image first!');
+        return;
+      }
+
+      alert('✅ Upload successful!\n\nIn the real application:\n• Image would be sent to the backend\n• Stored in the database\n• Displayed in the insights section\n• Linked to the selected event');
+      hideModal();
+    }
+
+    // Close modal on outside click
+    document.getElementById('uploadModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        hideModal();
+      }
+    });
+  </script>
+</body>
+</html>

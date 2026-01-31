@@ -80,4 +80,26 @@ router.delete('/:id', idParam, handleValidation, (req, res) => {
   res.json({ success: true });
 });
 
+// List images for an event
+router.get('/:id/images', (req, res) => {
+  const event = db.prepare('SELECT id FROM events WHERE id = ?').get(req.params.id);
+  if (!event) return res.status(404).json({ success: false, error: 'Event not found' });
+  const rows = db.prepare('SELECT id, url, caption, created_at FROM event_images WHERE event_id = ? ORDER BY created_at DESC').all(req.params.id);
+  res.json({ success: true, data: rows || [] });
+});
+
+// Add an image URL for an event
+router.post('/:id/images', (req, res) => {
+  const event = db.prepare('SELECT id FROM events WHERE id = ?').get(req.params.id);
+  if (!event) return res.status(404).json({ success: false, error: 'Event not found' });
+  const { url, caption } = req.body || {};
+  if (!url || typeof url !== 'string' || !/^https?:\/\//i.test(url)) {
+    return res.status(400).json({ success: false, error: 'Valid image URL is required (http/https)' });
+  }
+  const id = uuidv4();
+  db.prepare('INSERT INTO event_images (id, event_id, url, caption) VALUES (?, ?, ?, ?)').run(id, req.params.id, url, caption || null);
+  const row = db.prepare('SELECT id, url, caption, created_at FROM event_images WHERE id = ?').get(id);
+  res.status(201).json({ success: true, data: row });
+});
+
 export default router;

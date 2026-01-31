@@ -71,6 +71,14 @@ export async function initDb() {
   }
   db = createWrapper();
   db.exec("CREATE TABLE IF NOT EXISTS alert_config (key TEXT PRIMARY KEY, value TEXT NOT NULL)");
+  // Ensure event_images table exists for storing event image URLs
+  db.exec(`CREATE TABLE IF NOT EXISTS event_images (
+    id TEXT PRIMARY KEY,
+    event_id TEXT NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+    url TEXT NOT NULL,
+    caption TEXT,
+    created_at TEXT DEFAULT (datetime('now'))
+  )`);
   save();
   // Seed default events: insert each if that id does not exist
   const now = new Date().toISOString();
