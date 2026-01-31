@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DIGITAL EVENT FEEDBACK ANALYZER</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <!-- Backend API URL (must match your backend server; default: http://localhost:3000) -->
+  <script>
+    (function() {
+      try {
+        var params = new URLSearchParams(window.location.search);
+        var api = params.get('api');
+        if (api) {
+          localStorage.setItem('API_BASE', api);
+        }
+        var stored = localStorage.getItem('API_BASE');
+        window.API_BASE = stored || (window.API_BASE || 'http://localhost:3000');
+      } catch (_) {
+        window.API_BASE = window.API_BASE || 'http://localhost:3000';
+      }
+    })();
+  </script>
+</head>
+<body>
+  <div class="noise-overlay" aria-hidden="true"></div>
+
+  <header class="header">
+    <div class="logo">
+      <span class="logo-icon">◆</span>
+      <span class="logo-text">FEEDBACK ANALYZER</span>
+    </div>
+    <div class="api-status" id="apiStatus" aria-live="polite"></div>
+    <nav class="nav">
+      <a href="#collect">Collect</a>
+      <a href="#insights">Insights</a>
+      <a href="#how-it-works">How it works</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-bg">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+        <div class="grid-pattern"></div>
+      </div>
+      <div class="hero-content">
+        <p class="hero-label">DIGITAL EVENT</p>
+        <h1 class="hero-title">
+          <span class="title-line">Feedback</span>
+          <span class="title-line accent">Analyzer</span>
+        </h1>
+        <p class="hero-desc">
+          Turn unstructured event feedback into <strong>clear, actionable insights</strong>.
+          Collect responses, analyze sentiment, and improve your next event.
+        </p>
+        <div class="hero-cta">
+          <a href="#collect" class="btn btn-primary">Submit feedback</a>
+          <a href="#insights" class="btn btn-ghost">View insights</a>
+        </div>
+      </div>
+      <div class="hero-stats">
+        <div class="stat">
+          <span class="stat-value" id="totalFeedback">0</span>
+          <span class="stat-label">Responses</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value" id="avgSentiment">—</span>
+          <span class="stat-label">Avg. sentiment</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value" id="insightCount">0</span>
+          <span class="stat-label">Insights</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section how-it-works" id="how-it-works">
+      <h2 class="section-title">How it works</h2>
+      <div class="steps">
+        <div class="step">
+          <span class="step-num">01</span>
+          <h3>Collect</h3>
+          <p>Attendees submit feedback via a simple form during or after the event.</p>
+        </div>
+        <div class="step">
+          <span class="step-num">02</span>
+          <h3>Analyze</h3>
+          <p>Sentiment analysis processes each response in real time (positive, neutral, negative).</p>
+        </div>
+        <div class="step">
+          <span class="step-num">03</span>
+          <h3>Insights</h3>
+          <p>Get clear visual insights and recommendations to improve your next event.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section collect" id="collect">
+      <h2 class="section-title">Share your feedback</h2>
+      <p class="section-desc">Your response helps us improve. A few words are enough.</p>
+      <form class="feedback-form" id="feedbackForm">
+        <div class="form-row two-cols">
+          <div class="form-group">
+            <label for="eventSelect">Event (optional)</label>
+            <select id="eventSelect" aria-label="Select event">
+              <option value="">— Type or select —</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="sessionSelect">Session (optional)</label>
+            <select id="sessionSelect" aria-label="Select session">
+              <option value="">— Select session —</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="eventName">Event name (if not in list)</label>
+          <input type="text" id="eventName" placeholder="e.g. Tech Summit 2025" autocomplete="off">
+        </div>
+        <div class="form-row two-cols">
+          <div class="form-group">
+            <label for="attendeeName">Your name (optional)</label>
+            <input type="text" id="attendeeName" placeholder="Name" autocomplete="name">
+          </div>
+          <div class="form-group">
+            <label for="attendeeEmail">Email (optional)</label>
+            <input type="email" id="attendeeEmail" placeholder="you@example.com" autocomplete="email">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="feedbackText">Your feedback *</label>
+          <textarea id="feedbackText" rows="4" placeholder="What did you think? What could be better? What did you love?" required></textarea>
+          <span class="char-count"><span id="charCount">0</span> characters</span>
+        </div>
+        <div class="form-group rating-group">
+          <label>Overall experience (optional)</label>
+          <div class="rating-stars" id="ratingStars">
+            <button type="button" class="star" data-value="1" aria-label="1 star">★</button>
+            <button type="button" class="star" data-value="2" aria-label="2 stars">★</button>
+            <button type="button" class="star" data-value="3" aria-label="3 stars">★</button>
+            <button type="button" class="star" data-value="4" aria-label="4 stars">★</button>
+            <button type="button" class="star" data-value="5" aria-label="5 stars">★</button>
+          </div>
+        </div>
+        <div class="form-group category-ratings">
+          <label>Category ratings (optional)</label>
+          <div class="category-ratings-grid">
+            <div class="cat-rate">
+              <span class="cat-label">Venue</span>
+              <div class="rating-stars small" data-category="venue"></div>
+            </div>
+            <div class="cat-rate">
+              <span class="cat-label">Content</span>
+              <div class="rating-stars small" data-category="content"></div>
+            </div>
+            <div class="cat-rate">
+              <span class="cat-label">Speakers</span>
+              <div class="rating-stars small" data-category="speakers"></div>
+            </div>
+            <div class="cat-rate">
+              <span class="cat-label">Organization</span>
+              <div class="rating-stars small" data-category="organization"></div>
+            </div>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-submit">Analyze & submit</button>
+      </form>
+      <div class="result-card" id="resultCard" hidden>
+        <div class="result-sentiment" id="resultSentiment"></div>
+        <p class="result-text" id="resultText"></p>
+        <div class="result-keywords" id="resultKeywords"></div>
+      </div>
+    </section>
+
+    <section class="section insights" id="insights">
+      <h2 class="section-title">Insights for event improvement</h2>
+      <p class="section-desc">Sentiment breakdown and top themes from all feedback.</p>
+      <div class="insights-toolbar">
+        <select id="insightEventFilter" aria-label="Filter by event">
+          <option value="">All events</option>
+        </select>
+        <div class="export-buttons">
+          <a href="#" id="exportExcel" class="btn btn-ghost btn-sm">Export Excel</a>
+          <a href="#" id="exportPdf" class="btn btn-ghost btn-sm">Export PDF</a>
+          <a href="#" id="exportCsv" class="btn btn-ghost btn-sm">Export CSV</a>
+        </div>
+      </div>
+      <div class="insights-grid">
+        <div class="insight-card chart-card">
+          <h3>Sentiment distribution</h3>
+          <div class="chart-wrap">
+            <canvas id="sentimentChart" width="280" height="280"></canvas>
+            <div class="chart-legend" id="chartLegend"></div>
+          </div>
+        </div>
+        <div class="insight-card list-card">
+          <h3>AI recommendations</h3>
+          <ul class="recommendations" id="recommendations">
+            <li>Submit feedback above to see personalized recommendations.</li>
+          </ul>
+        </div>
+        <div class="insight-card">
+          <h3>Executive summary</h3>
+          <p class="exec-summary" id="execSummary">Loading…</p>
+          <div class="nps-row" id="npsRow"></div>
+        </div>
+        <div class="insight-card">
+          <h3>Trending keywords</h3>
+          <p class="keywords-desc">Most frequent themes extracted from feedback.</p>
+          <div class="trending-keywords" id="trendingKeywords">
+            <p class="empty-state">Submit feedback to see extracted keywords.</p>
+          </div>
+        </div>
+        <div class="insight-card full-width">
+          <h3>Recent feedback (with sentiment & keywords)</h3>
+          <div class="feedback-list" id="feedbackList">
+            <p class="empty-state">No feedback yet. Be the first to submit!</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Digital Event Feedback Analyzer — Clear insights for event improvement.</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

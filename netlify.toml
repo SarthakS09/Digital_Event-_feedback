@@ -1,0 +1,15 @@
+[build]
+  publish = "."
+  command = ""
+
+[build.environment]
+  # Optionally set a default API base for production via environment var
+  # You can set NETLIFY_API_BASE in the Netlify UI and it will override window.API_BASE at runtime
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Cache-Control = "public, max-age=600, s-maxage=600"
